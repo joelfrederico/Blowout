@@ -1,0 +1,2 @@
+sphinx_py3doc_enhanced_theme>=2.1.1
+pip>=7.1
