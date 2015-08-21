@@ -1,15 +1,27 @@
-import numpy as _np
-import scisalt as _ss
 from . import Efield as _Efield
-import scipy.constants as _spc
+from .simframework import SimFrame
 import h5py as _h5
-import time as _time
 import logging as _logging
+import numpy as _np
 import pkg_resources as _pkg_resources
+import scipy.constants as _spc
+import scisalt as _ss
+import time as _time
+
 # import ipdb
 _version = _pkg_resources.get_distribution('blowout').version
 
 _logger = _logging.getLogger(__name__)
+
+
+def loadSim(filebase):
+    """
+    Loads simulation.
+    """
+    plas  = loadPlasma(filename='{}.plasma.h5'.format(filebase))
+    drive = loadDrive(filename='{}.drive.h5'.format(filebase))
+    
+    return SimFrame(drive, plas)
 
 
 def loadPlasma(filename=None, gui=True):
@@ -22,14 +34,8 @@ def loadPlasma(filename=None, gui=True):
         import scisalt.qt as _ssqt
         filename = _ssqt.getOpenFileName()
 
-    with _h5.File(name=filename) as f:
-        
-        # ======================================
-        # Check version
-        # ======================================
-        fversion = f.attrs['version']
-        if  fversion != _version:
-            _logger.critical('Versions do not match! File: {}; Software: {}'.format(fversion, _version))
+    with _h5.File(name=filename, mode='r') as f:
+        _checkversion(f)
 
         # ======================================
         # Load metadata
@@ -73,16 +79,51 @@ def loadPlasma(filename=None, gui=True):
     return plas
 
 
+def loadDrive(filename=None, gui=True):
+    if filename is None and gui:
+        import scisalt.qt as _ssqt
+        filename = _ssqt.getOpenFileName()
+
+    with _h5.File(name=filename, mode='r') as f:
+        _checkversion(f)
+
+        # ======================================
+        # Load metadata
+        # ======================================
+        mattrs = f['metadata'].attrs
+        sx     = mattrs['sx']
+        sy     = mattrs['sy']
+        sz     = mattrs['sz']
+        charge = mattrs['charge']
+        gamma  = mattrs['gamma']
+
+    return Drive(
+        sx     = sx,
+        sy     = sy,
+        sz     = sz,
+        charge = charge,
+        gamma  = gamma
+        )
+    
+
 class Drive(object):
     """
     Contains properties derived from the drive bunch.
     """
     def __init__(self, sx, sy, sz, charge, gamma):
-        self._sx     = sx
-        self._sy     = sy
-        self._sz     = sz
-        self._charge = charge
-        self._gamma  = gamma
+        self._sx        = sx
+        self._sy        = sy
+        self._sz        = sz
+        self._charge    = charge
+        self._gamma     = gamma
+        self._timestamp = None
+
+    @property
+    def timestamp(self):
+        if self._timestamp is not None:
+            return self._timestamp
+        else:
+            raise RuntimeError('No timestamp: simulation not completed.')
 
     @property
     def sx(self):
@@ -126,6 +167,26 @@ class Drive(object):
         # This actually is q = rho(z) * dz / dz.
         q = self.charge * _ss.numpy.gaussian(xi, 0, self.sz)
         return _Efield.E_complex(x, y, self.sx, self.sy, self.charge)
+
+    def write(self, filename=None):
+        filename = _timestamp2filename(self, ftype='drive', filename=filename)
+        # ======================================
+        # Create new filename
+        # ======================================
+        with _h5.File(filename, 'w') as f:
+            # ipdb.set_trace()
+            f.attrs['version'] = _version
+            # f.attrs.create(name='version', data=_version)
+
+            # ======================================
+            # Write metadata
+            # ======================================
+            gmeta = f.create_group('metadata')
+            gmeta.attrs.create(name='sx'     , data=self.sx     )
+            gmeta.attrs.create(name='sy'     , data=self.sy     )
+            gmeta.attrs.create(name='sz'     , data=self.sz     )
+            gmeta.attrs.create(name='charge' , data=self.charge )
+            gmeta.attrs.create(name='gamma'  , data=self.gamma  )
 
 
 class PlasmaE(object):
@@ -206,18 +267,7 @@ class PlasmaE(object):
         """
         Write all of the particles and plasma parameters to a file.
         """
-        # ======================================
-        # Get filename from timestamp
-        # ======================================
-        if filename is None:
-            try:
-                timestamp = self.timestamp
-            except RuntimeError as err:
-                _logger.debug('Handled exception: {}'.format(err))
-                timestamp = _time.localtime()
-
-            filename = _time.strftime('%Y.%m.%d.%H%M.%S.plasma.h5', timestamp)
-            
+        filename = _timestamp2filename(self, ftype='plasma', filename=filename)
         # ======================================
         # Create new filename
         # ======================================
@@ -327,3 +377,27 @@ class PlasmaE_Random(PlasmaE):
         The number of particles in the simulation.
         """
         return self._num_parts
+
+
+def _timestamp2filename(cls, ftype, filename=None):
+    # ======================================
+    # Get filename from timestamp
+    # ======================================
+    if filename is None:
+        try:
+            timestamp = cls.timestamp
+        except RuntimeError as err:
+            _logger.debug('Handled exception: {}'.format(err))
+            timestamp = _time.localtime()
+
+        filename = _time.strftime('%Y.%m.%d.%H%M.%S.{}.h5'.format(ftype), timestamp)
+
+    return filename
+
+def _checkversion(f):
+    # ======================================
+    # Check version
+    # ======================================
+    fversion = f.attrs['version']
+    if  fversion != _version:
+        _logger.critical('Versions do not match! File: {}; Software: {}'.format(fversion, _version))

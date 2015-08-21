@@ -44,8 +44,9 @@ class SimFrame(object):
         # ======================================
         # Record completion timestamp
         # ======================================
-        self._timestamp = _time.localtime()
+        self._timestamp         = _time.localtime()
         self.PlasmaE._timestamp = self._timestamp
+        self.Drive._timestamp   = self._timestamp
 
     @property
     def PlasmaE(self):
@@ -60,3 +61,7 @@ class SimFrame(object):
         The drive :class:`blowout.generate.Drive` used for the simulation.
         """
         return self._Drive
+
+    def write(self, filename=None):
+        self.PlasmaE.write(filename=filename)
+        self.Drive.write(filename=filename)

@@ -27,7 +27,7 @@ xi_start  = -5*sz
 xi_end    = 0
 dxi       = sz/5
 # dxi       = sz
-num_parts = 1e6
+num_parts = 1e5
 npl        = 1e18
 
 num_pts   = 100
@@ -55,4 +55,4 @@ plasma = bo.generate.PlasmaE_Random(
 
 sim = bo.SimFrame(Drive=drive, PlasmaE=plasma)
 sim.sim()
-sim.PlasmaE.write()
+sim.write()

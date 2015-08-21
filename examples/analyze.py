@@ -7,13 +7,15 @@ import numpy as np
 import skimage.feature as skfeat
 
 
-filename = '2015.08.20.1707.39.plasma.h5'
-plas = bo.generate.loadPlasma(filename)
+sim = bo.generate.loadSim('2015.08.20.1825.34')
+# plas = bo.generate.loadPlasma(filename)
+PlasmaE = sim.PlasmaE
+Drive = sim.Drive
 
-x_coords = plas.x_coords[-2:-1]
-y_coords = plas.y_coords[-2:-1]
-bx_coords = plas.bx_coords[-2:-1]
-by_coords = plas.by_coords[-2:-1]
+x_coords  = PlasmaE.x_coords[-2:-1]
+y_coords  = PlasmaE.y_coords[-2:-1]
+bx_coords = PlasmaE.bx_coords[-2:-1]
+by_coords = PlasmaE.by_coords[-2:-1]
 
 # ipdb.set_trace()
 
@@ -41,7 +43,10 @@ for x, y, bx, by in zip(x_coords, y_coords, bx_coords, by_coords):
 # ======================================
 # Find evacuated ellipse
 # ======================================
-img, discard = ss.matplotlib.hist2d(x, y, bins=50, plot=False)
+ind = np.abs(x) < 3
+
+img, discard = ss.matplotlib.hist2d(x[ind], y[ind], bins=200, plot=False)
+ss.matplotlib.Imshow_Slider(img)
 # img_thresh = img < 1
 # labels = skmeas.label(img_thresh)
 edges = skfeat.canny(img)
