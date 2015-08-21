@@ -1,4 +1,4 @@
-.. SciSalt documentation master file, created by
+.. Blowout documentation master file, created by
    sphinx-quickstart on Sat Jul 11 17:33:57 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -16,6 +16,7 @@ This is the documentation for Blowout v\ |release|, last updated |today|.
    :numbered:
    :maxdepth: 2
 
+   fulldoc/fulldoc
    changelog
 
 Indices and tables
