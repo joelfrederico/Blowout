@@ -57,14 +57,8 @@ Xgrid, Ygrid = np.meshgrid(x, y)
 # ======================================
 # Evaluate Bassetti-Erskine
 # ======================================
-E = E_complex(Xgrid.T, Ygrid.T, sx, sy, 1)
-
-# ======================================
-# Get components
-# ======================================
-E_real = np.real(E)
-E_imag = -np.imag(E)
-E_mag = np.absolute(E)
+E_x, E_y = E_complex(Xgrid.T, Ygrid.T, sx, sy, 1)
+E_mag = np.sqrt(E_x**2 + E_y**2)
 
 # ======================================
 # Evaluate 2D Circular Gaussian
@@ -92,11 +86,13 @@ sm.addlabel(ax=ax[0, 2], toplabel='Field Magnitude Difference', xlabel='x', ylab
 # ======================================
 # Plot differences in major, minor axes
 # ======================================
-x = np.linspace(0, 10, 1000)
+x = np.linspace(0, sx*5, 1000)
 line1 = ax[1, 0].plot(x, invlaw(x, 0, 1), label='$E_x$, Circularly Symmetric')
 # ylim = ax.get_ylim()
-line2 = ax[1, 0].plot(x, np.abs(E_complex(x, 0, sx, sy, 1)), label='$E_x$, Elliptical')
-line3 = ax[1, 0].plot(x, np.abs(E_complex(0, x, sx, sy, 1)), label='$E_y$, Elliptical')
+E_xaxis, temp = E_complex(x, 0, sx, sy, 1)
+temp, E_yaxis = E_complex(0, x, sx, sy, 1)
+line2 = ax[1, 0].plot(x, E_xaxis, label='$E_x$, Elliptical')
+line3 = ax[1, 0].plot(x, E_yaxis, label='$E_y$, Elliptical')
 # ax.set_ylim(ylim)
 
 sm.addlabel(ax=ax[1, 0], toplabel='Ellipse vs. Circle', xlabel='r', ylabel='E Field')
@@ -106,18 +102,16 @@ ax[1, 0].legend(loc=1)
 # ======================================
 # Quiver
 # ======================================
-gridpts = 20
-lims    = 10
+gridpts      = 20
+lims         = 10
 x            = np.linspace(-lims, lims, gridpts)
 delx         = x[1]-x[0]
 y            = np.linspace(-lims, lims, gridpts)
 dely         = y[1]-y[0]
 Xgrid, Ygrid = np.meshgrid(x, y)
-E            = E_complex(Xgrid.T, Ygrid.T, sx, sy, 1)
-E_real       = np.real(E)
-E_imag       = -np.imag(E)
-E_mag        = np.absolute(E)
-im           = sm.quiver(E_real, E_imag, ax=ax[1, 1])
+E_x, E_y     = E_complex(Xgrid.T, Ygrid.T, sx, sy, 1)
+E_mag        = np.sqrt(E_x**2 + E_y**2)
+im           = sm.quiver(E_x, E_y, ax=ax[1, 1])
 
 # ======================================
 # Working...

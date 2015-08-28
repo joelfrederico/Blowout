@@ -9,10 +9,13 @@ import scisalt as ss
 import scisalt.matplotlib as sm
 import skimage.feature as skfeat
 import skimage.measure as skmeas
+import logging as _logging
+import sys
 
-import ipdb
+# import ipdb
 
-ss.logging.mylogger(__name__)
+level = _logging.DEBUG
+logger = ss.logging.mylogger(filename='run')
 
 # ======================================
 # Get relevant constants
@@ -33,26 +36,27 @@ npl        = 1e18
 num_pts   = 100
 shape = (num_pts, num_pts)
 
-drive = bo.generate.Drive(sx, sy, sz=sz, charge=qtot, gamma=39824)
-plasma = bo.generate.PlasmaE_Random(
-    x_mag     = mag,
-    y_mag     = mag,
-    xi_start  = xi_start,
-    xi_end    = xi_end,
-    dxi       = dxi,
-    num_parts = num_parts,
-    np        = npl
-    )
-# plasma = bo.generate.PlasmaE_Grid(
-#     num_pts  = num_pts,
-#     x_mag    = mag,
-#     y_mag    = mag,
-#     xi_start = xi_start,
-#     xi_end   = xi_end,
-#     dxi      = dxi,
-#     np       = npl
-#     )
+Drive = bo.drive.Drive(sx, sy, sz=sz, charge=qtot, gamma=39824)
 
-sim = bo.SimFrame(Drive=drive, PlasmaE=plasma)
+PlasmaParams = bo.plasma.PlasmaParams(
+    xi_start = xi_start,
+    xi_end   = xi_end,
+    dxi      = dxi,
+    np       = npl
+    )
+
+PlasmaE = bo.electrons.PlasmaE_Random(
+    x_mag        = mag,
+    y_mag        = mag,
+    num_parts    = num_parts,
+    PlasmaParams = PlasmaParams
+    )
+
+PlasmaIons = bo.ions.PlasmaIons(
+    PlasmaParams = PlasmaParams
+    )
+
+sim = bo.SimFrame(Drive=Drive, PlasmaE=PlasmaE, PlasmaIons=PlasmaIons)
 sim.sim()
+# sim.write(filename='test')
 sim.write()
