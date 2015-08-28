@@ -1,7 +1,7 @@
 # Author: Joel Frederico
 """
 """
-__version__ = '0.0.0'
+__version__ = '0.1.0'
 # __all__ = [
 #     'E_complex'
 #     ]
