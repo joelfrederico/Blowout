@@ -12,6 +12,8 @@ from .support import _read_dict
 _logger  = _logging.getLogger(__name__)
 _version = _pkg_resources.get_distribution('blowout').version
 
+import pdb
+
 
 def loadSim(filebase):
     """
@@ -203,4 +205,4 @@ def _checkversion(f):
     # ======================================
     fversion = f.attrs['version']
     if fversion != _version:
-        _logger.critical('Versions do not match! File: {}; Software: {}'.format(fversion, _version))
+        _logger.critical('Versions do not match! File version: {}; Software version: {}; File: {}'.format(fversion, _version, f.filename))

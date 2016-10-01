@@ -41,8 +41,8 @@ class SimFrame(object):
                 # ======================================
                 # Update positions
                 # ======================================
-                PlasmaE.x_coords[i+1, :] = PlasmaE.x_coords[i, :] + PlasmaE.bx_coords[i, :] * _spc.speed_of_light * dt * 1e11
-                PlasmaE.y_coords[i+1, :] = PlasmaE.y_coords[i, :] + PlasmaE.by_coords[i, :] * _spc.speed_of_light * dt * 1e11
+                PlasmaE.x_coords[i+1, :] = PlasmaE.x_coords[i, :] + PlasmaE.bx_coords[i, :] * _spc.speed_of_light * dt
+                PlasmaE.y_coords[i+1, :] = PlasmaE.y_coords[i, :] + PlasmaE.by_coords[i, :] * _spc.speed_of_light * dt
 
                 # ======================================
                 # Get ion shape

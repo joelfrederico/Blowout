@@ -19,11 +19,14 @@ import time
 filename = '2015.08.27.1654.16'
 sim      = bo.load.loadSim(filename)
 
-sim.PlasmaIons.draw_ellipse(i=-1)
+plt.ion()
+# sim.PlasmaIons.draw_ellipse(i=1)
+
+def plotimg(i):
+    Imshow_Slider(sim.PlasmaIons._img[i])
 
 # num_samples = len(x_coords[0])
 # num_subset = 1000
 # ind = np.arange(0, num_samples)
 # if num_samples > num_subset:
 #     ind = np.random.choice(ind, size=num_subset, replace=False)
-
